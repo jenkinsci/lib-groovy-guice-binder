@@ -1,9 +1,7 @@
 package org.jenkinsci.groovy.binder
 
-import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Names
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -17,7 +15,7 @@ import static com.google.inject.Guice.createInjector
 /**
  * @author Kohsuke Kawaguchi
  */
-public class GroovyWiringModuleTest extends Assert {
+public class GroovyWiringModuleTest {
     @Inject @Named("dog")
     String dog;
 
@@ -64,5 +62,13 @@ public class GroovyWiringModuleTest extends Assert {
         m.addStarImports(Animal.class.package.name)
         def i = createInjector(m);
         assert i.getInstance(Animal.class) instanceof Dog
+    }
+
+    @Test
+    public void payment() {
+        def m = new GroovyWiringModule(getClass().getResource("payment.conf"))
+        m.addStarImports(Payment.class.package.name)
+        def i = createInjector(m);
+        assert i.getInstance(Payment.class) instanceof Visa
     }
 }

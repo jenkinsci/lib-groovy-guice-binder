@@ -2,7 +2,10 @@ package org.jenkinsci.groovy.binder;
 
 import com.google.inject.Binder;
 import com.google.inject.Provider;
+import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.name.Names;
 
 /**
  * Mix-in for DSL.
@@ -20,6 +23,10 @@ public class BinderCategory {
 
     public static <T> ScopedBindingBuilder to(Class<T> type, Provider<? extends T> impl) {
         return BINDER.get().bind(type).toProvider(impl);
+    }
+
+    public static <T> LinkedBindingBuilder<T> named(AnnotatedBindingBuilder<T> builder, String name) {
+        return builder.annotatedWith(Names.named(name));
     }
 
     /*package*/ static final ThreadLocal<Binder> BINDER = new ThreadLocal<Binder>();

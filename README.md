@@ -45,7 +45,7 @@ Assignment to undeclared variables become `@Named` instance binding
 All the methods on the `Binder` class are directly accessible, so you can use all Guice Binding EDSL as-is.
 
     // in Groovy
-    bind(Payment).to(VisaPayment)
+    bind Payment to VisaPayment
 
     // equivalent binding in Java
     bind(Payment.class).to(VisaPayment.class)
@@ -60,3 +60,14 @@ System properties and Environment variables can be accessed readily:
     // equivalent binding in Java
     bind(String.class).named("src").toInstance(System.getProperty("java.home"))
     bind(String.class).named("dst").toInstance(System.getenv("JENKINS_HOME"))
+
+### DSL enhancements
+`BinderCategory` adds [the category support](http://groovy.codehaus.org/Groovy+Categories) to make
+the configuration script flow better.
+
+    // in Groovy
+    bind Payment named "customer" to VisaPayment
+    bind Payment named "internal" to MasterCardPayment
+
+    //
+    bind(Payment.class).
