@@ -31,6 +31,8 @@ import static java.util.Collections.*;
 public class GroovyWiringModule extends AbstractModule {
     private final Collection<URL> scripts;
     private final ImportCustomizer importCustomizer = new ImportCustomizer();
+
+    private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private Level level = Level.FINE;
 
     public GroovyWiringModule(URL... scripts) {
@@ -49,6 +51,14 @@ public class GroovyWiringModule extends AbstractModule {
      */
     public GroovyWiringModule withLogLevel(Level l) {
         this.level = l;
+        return this;
+    }
+
+    /**
+     * Sets the class loader that determines what classes Groovy wiring script will see.
+     */
+    public GroovyWiringModule withClassLoader(ClassLoader cl) {
+        this.classLoader = cl;
         return this;
     }
 
@@ -92,6 +102,13 @@ public class GroovyWiringModule extends AbstractModule {
         m.configure(binder());
     }
 
+    /**
+     * Creates {@llink GroovyWiringModule} that loads all the specified script files.
+     *
+     * @param scriptsFiles
+     *      If this is a file, that single file is loaded. If this is a directory,
+     *      all the "*.groovy" files in this directory gets loaded.
+     */
     public static GroovyWiringModule allOf(File scriptsFiles) throws IOException {
         if (scriptsFiles==null)   return new GroovyWiringModule();
 
@@ -122,13 +139,14 @@ public class GroovyWiringModule extends AbstractModule {
         return new GroovyWiringModule(urls);
     }
 
-
+    /**
+     * Creates {@link GroovyShell} that controls how scripts are loaded.
+     */
     protected GroovyShell createShell() {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader(); // webapp classloader is sufficient
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.setScriptBaseClass(BinderClosureScript.class.getName());
         cc.addCompilationCustomizers(importCustomizer);
-        return new GroovyShell(cl,new Binding(),cc);
+        return new GroovyShell(classLoader, new Binding(),cc);
     }
 
     private static final Logger LOGGER = Logger.getLogger(GroovyWiringModule.class.getName());
