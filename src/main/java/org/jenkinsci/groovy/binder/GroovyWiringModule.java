@@ -4,10 +4,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import groovy.lang.Binding;
+import groovy.lang.Closure;
 import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.runtime.GroovyCategorySupport;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -89,11 +91,18 @@ public class GroovyWiringModule extends AbstractModule {
                 protected void configure() {
                     try {
                         LOGGER.log(level, "Loading " + url);
-                        BinderClosureScript s = (BinderClosureScript)shell.parse(new GroovyCodeSource(url));
+                        final BinderClosureScript s = (BinderClosureScript)shell.parse(new GroovyCodeSource(url));
                         s.setBinder(binder());
-                        s.run();
+                        BinderCategory.BINDER.set(binder());
+                        GroovyCategorySupport.use(BinderCategory.class,new Closure<Object>(this) {
+                            public Object call() {
+                                return s.run();
+                            }
+                        });
                     } catch (IOException e) {
                         throw new Error("Failed to configure via "+url,e);
+                    } finally {
+                        BinderCategory.BINDER.set(null);
                     }
                 }
             });
