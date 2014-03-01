@@ -58,8 +58,8 @@ System properties and Environment variables can be accessed readily:
     dst = envs['JENKINS_HOME']
 
     // equivalent binding in Java
-    bind(String.class).named("src").toInstance(System.getProperty("java.home"))
-    bind(String.class).named("dst").toInstance(System.getenv("JENKINS_HOME"))
+    bind(String.class).annotatedWith(Names.named("src")).toInstance(System.getProperty("java.home"))
+    bind(String.class).annotatedWith(Names.named("dst")).toInstance(System.getenv("JENKINS_HOME"))
 
 ### DSL enhancements
 `BinderCategory` adds [the category support](http://groovy.codehaus.org/Groovy+Categories) to make
@@ -69,5 +69,6 @@ the configuration script flow better.
     bind Payment named "customer" to VisaPayment
     bind Payment named "internal" to MasterCardPayment
 
-    //
-    bind(Payment.class).
+    // equivalent binding in Java
+    bind(Payment.class).annotatedWith(Names.named("customer")).to(VisaPayment.class)
+    bind(Payment.class).annotatedWith(Names.named("internal")).to(MasterCardPayment.class)
