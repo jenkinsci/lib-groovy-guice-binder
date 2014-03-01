@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public abstract class BinderClosureScript extends Script {
-    private Object delegate;
+    private Binder binder;
     private MetaClass metaClass;
 
     public BinderClosureScript() {
@@ -46,13 +46,6 @@ public abstract class BinderClosureScript extends Script {
     }
 
     /**
-     * Expose {@link Binder} to the script.
-     */
-    public Binder getBinder() {
-        return (Binder)getDelegate();
-    }
-
-    /**
      * Convenient access to system properties.
      */
     public Map<String,String> getProperties() {
@@ -69,15 +62,15 @@ public abstract class BinderClosureScript extends Script {
     /**
      * Sets the delegation target.
      */
-    public void setDelegate(Object delegate) {
-        this.delegate = delegate;
-        this.metaClass = InvokerHelper.getMetaClass(delegate.getClass());
+    public void setBinder(Binder binder) {
+        this.binder = binder;
+        this.metaClass = InvokerHelper.getMetaClass(binder.getClass());
     }
 
     @Override
     public Object invokeMethod(String name, Object args) {
         try {
-            return metaClass.invokeMethod(delegate,name,args);
+            return metaClass.invokeMethod(binder,name,args);
         } catch (MissingMethodException mme) {
             return super.invokeMethod(name, args);
         }
@@ -86,13 +79,16 @@ public abstract class BinderClosureScript extends Script {
     @Override
     public Object getProperty(String property) {
         try {
-            return metaClass.getProperty(delegate,property);
+            return metaClass.getProperty(binder,property);
         } catch (MissingPropertyException e) {
             return super.getProperty(property);
         }
     }
 
-    public Object getDelegate() {
-        return delegate;
+    /**
+     * Expose {@link Binder} to the script.
+     */
+    public Binder getBinder() {
+        return binder;
     }
 }

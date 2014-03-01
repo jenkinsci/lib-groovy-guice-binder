@@ -90,7 +90,7 @@ public class GroovyWiringModule extends AbstractModule {
                     try {
                         LOGGER.log(level, "Loading " + url);
                         BinderClosureScript s = (BinderClosureScript)shell.parse(new GroovyCodeSource(url));
-                        s.setDelegate(binder());
+                        s.setBinder(binder());
                         s.run();
                     } catch (IOException e) {
                         throw new Error("Failed to configure via "+url,e);
