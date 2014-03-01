@@ -107,7 +107,8 @@ public class GroovyWiringModule extends AbstractModule {
      *
      * @param scriptsFiles
      *      If this is a file, that single file is loaded. If this is a directory,
-     *      all the "*.groovy" files in this directory gets loaded.
+     *      all the "*.groovy" files in this directory gets loaded (in their
+     *      lexicographical order to guarantee consistency.)
      */
     public static GroovyWiringModule allOf(File scriptsFiles) throws IOException {
         if (scriptsFiles==null)   return new GroovyWiringModule();
