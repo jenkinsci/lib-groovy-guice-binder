@@ -129,6 +129,8 @@ public class GroovyWiringModule extends AbstractModule {
             }));
         }
 
+        scripts = new ArrayList<File>(scripts);
+
         // sort to apply them in consistent ordering
         Collections.sort(scripts);
 
