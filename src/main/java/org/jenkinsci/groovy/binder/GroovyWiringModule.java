@@ -155,10 +155,18 @@ public class GroovyWiringModule extends AbstractModule {
      * Creates {@link GroovyShell} that controls how scripts are loaded.
      */
     protected GroovyShell createShell() {
+        CompilerConfiguration cc = configureCompiler();
+        return new GroovyShell(classLoader, new Binding(),cc);
+    }
+
+    /**
+     * Allow subtypes to control {@link CompilerConfiguration}.
+     */
+    protected CompilerConfiguration configureCompiler() {
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.setScriptBaseClass(BinderClosureScript.class.getName());
         cc.addCompilationCustomizers(importCustomizer);
-        return new GroovyShell(classLoader, new Binding(),cc);
+        return cc;
     }
 
     private static final Logger LOGGER = Logger.getLogger(GroovyWiringModule.class.getName());
