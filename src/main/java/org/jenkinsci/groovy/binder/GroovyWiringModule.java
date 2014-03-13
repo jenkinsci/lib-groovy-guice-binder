@@ -34,6 +34,9 @@ public class GroovyWiringModule extends AbstractModule {
     private final Collection<URL> scripts;
     private final ImportCustomizer importCustomizer = new ImportCustomizer();
 
+    private final CompilerConfiguration cc = new CompilerConfiguration();
+
+
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private Level level = Level.FINE;
 
@@ -43,6 +46,14 @@ public class GroovyWiringModule extends AbstractModule {
 
     public GroovyWiringModule(Collection<URL> scripts) {
         this.scripts = scripts;
+
+        cc.setScriptBaseClass(BinderClosureScript.class.getName());
+        importCustomizer.addStarImports("com.google.inject");
+        cc.addCompilationCustomizers(importCustomizer);
+    }
+
+    public CompilerConfiguration getCompilerConfiguration() {
+        return cc;
     }
 
     /**
@@ -155,18 +166,7 @@ public class GroovyWiringModule extends AbstractModule {
      * Creates {@link GroovyShell} that controls how scripts are loaded.
      */
     protected GroovyShell createShell() {
-        CompilerConfiguration cc = configureCompiler();
-        return new GroovyShell(classLoader, new Binding(),cc);
-    }
-
-    /**
-     * Allow subtypes to control {@link CompilerConfiguration}.
-     */
-    protected CompilerConfiguration configureCompiler() {
-        CompilerConfiguration cc = new CompilerConfiguration();
-        cc.setScriptBaseClass(BinderClosureScript.class.getName());
-        cc.addCompilationCustomizers(importCustomizer);
-        return cc;
+        return new GroovyShell(classLoader, new Binding(), getCompilerConfiguration());
     }
 
     private static final Logger LOGGER = Logger.getLogger(GroovyWiringModule.class.getName());
