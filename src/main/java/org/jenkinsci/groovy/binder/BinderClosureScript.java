@@ -1,8 +1,11 @@
 package org.jenkinsci.groovy.binder;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.Module;
 import com.google.inject.name.Names;
 import groovy.lang.Binding;
+import groovy.lang.Closure;
 import groovy.lang.MetaClass;
 import groovy.lang.MissingMethodException;
 import groovy.lang.MissingPropertyException;
@@ -41,6 +44,11 @@ public abstract class BinderClosureScript extends Script {
      */
     @Override
     public void setProperty(String property, Object value) {
+        // set it to binding so that the script can read them back like local variables,
+        // as if they are defined like "def x = y"
+        super.setProperty(property,value);
+
+        // expose this to Binder as well
         Binder binder = getBinder();
         binder.bind((Class)value.getClass()).annotatedWith(Names.named(property)).toInstance(value);
     }
@@ -90,5 +98,27 @@ public abstract class BinderClosureScript extends Script {
      */
     public Binder getBinder() {
         return binder;
+    }
+
+    /**
+     * Given a closure that uses Groovy binder DSL, wrap that into a Guice {@link Module}.
+     *
+     * <p>
+     * To reuse the DSL methods defined on {@link BinderClosureScript} and its super types,
+     * while we call the closure we temporarily swap {@link Binder} object.
+     */
+    public Module module(final Closure c) {
+        return new AbstractModule() {
+            @Override
+            protected void configure() {
+                final Binder old = getBinder();
+                try {
+                    c.setDelegate(binder());
+                    c.call();
+                } finally {
+                    setBinder(old);
+                }
+            }
+        };
     }
 }

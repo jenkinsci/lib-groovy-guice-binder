@@ -36,10 +36,12 @@ Assignment to undeclared variables become `@Named` instance binding
     // in Groovy
     a = 5;
     b = new Foo(...);
+    c = a + 3
 
     // equivalent binding in Java
     bind(int.class).named("a").toInstance(5);
     bind(Foo.class).named("b").toInstance(new Foo(...));
+    bind(int.class).named("c").toInstance(5+3);
 
 ### Direct access to the `Binder` methods
 All the methods on the `Binder` class are directly accessible, so you can use all Guice Binding EDSL as-is.
@@ -61,7 +63,24 @@ System properties and Environment variables can be accessed readily:
     bind(String.class).annotatedWith(Names.named("src")).toInstance(System.getProperty("java.home"))
     bind(String.class).annotatedWith(Names.named("dst")).toInstance(System.getenv("JENKINS_HOME"))
 
-### DSL enhancements
+### Sub-modules
+You can turn closures into Guice modules:
+
+    // in Groovy
+    def x = module {
+        a = 5;
+    }
+    install(x)
+
+    // equivalent binding in Java
+    install(new AbstractModule() {
+        public void configure() {
+            bind(int.class).annotatedWith(Names.named("a")).toInstance(5);
+        }
+    });
+
+
+### Binder/Module enhancements
 `BinderCategory` adds [the category support](http://groovy.codehaus.org/Groovy+Categories) to make
 the configuration script flow better.
 
@@ -72,3 +91,15 @@ the configuration script flow better.
     // equivalent binding in Java
     bind(Payment.class).annotatedWith(Names.named("customer")).to(VisaPayment.class)
     bind(Payment.class).annotatedWith(Names.named("internal")).to(MasterCardPayment.class)
+
+Modules can be combined with '+' operator:
+
+    // in Groovy
+    install((new MyModule() + new YourModule()).overrideWith(new TheOtherModule())
+
+    // equivalent binding in Java
+    bind(
+      Modules
+        .override(Modules.combine(new MyModule(), new YourModule()))
+        .with(new TheOtherModule()))
+
